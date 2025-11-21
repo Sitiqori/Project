@@ -27,12 +27,15 @@ Aplikasi ini menyediakan:
 - Visualisasi grafik menggunakan Matplotlib  
 ---
 
+![Tampilan](./Tampilan.png)
+
+
 ## 🚀 Fitur Utama
 - 🔄 **Simulasi 3 algoritma** (FIFO, LRU, Optimal)  
 - 📊 **Visualisasi Page Fault**  
 - 🖥️ **GUI sederhana** (Tkinter)  
 - 📁 **Tracking setiap langkah simulasi**  
-- 🧪 **Modular (main.py, gui.py, simulation.py, visualization.py)**  
+- 🧪 **Modular (main.py, gui.py, simulation.py, visualization.py)**
 
 
 ## 🛠️ Cara Menjalankan
@@ -43,3 +46,9 @@ Pastikan Python sudah terinstall.
 pip install matplotlib
 
 python main.py
+```
+
+
+![Hasil Unduh](./Hasil%20Unduh.png)
+
+![Grafik Hasil](./Grafik%20Hasil.png)
