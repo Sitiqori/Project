@@ -1,0 +1,114 @@
+from collections import deque, Counter
+
+class FIFOHandler:
+    def __init__(self, frames):
+        self.memory = deque(maxlen=frames)
+        self.page_faults = 0
+        self.states = []
+
+    def step(self, page):
+        if page not in self.memory:
+            self.memory.append(page)
+            self.page_faults += 1
+        self.states.append(list(self.memory))
+        return self.page_faults, list(self.memory)
+
+
+class LRUHandler:
+    def __init__(self, frames):
+        self.memory = []
+        self.page_faults = 0
+        self.frames = frames
+        self.states = []
+
+    def step(self, page):
+        if page not in self.memory:
+            if len(self.memory) == self.frames:
+                self.memory.pop(0)
+            self.memory.append(page)
+            self.page_faults += 1
+        else:
+            self.memory.remove(page)
+            self.memory.append(page)
+        self.states.append(list(self.memory))
+        return self.page_faults, list(self.memory)
+
+
+class OptimalHandler:
+    def __init__(self, frames, full_sequence):
+        self.memory = []
+        self.page_faults = 0
+        self.frames = frames
+        self.full_sequence = full_sequence
+        self.current_step = 0
+        self.states = []
+
+    def step(self, page):
+        if page not in self.memory:
+            if len(self.memory) < self.frames:
+                self.memory.append(page)
+            else:
+                future_uses = []
+                for p in self.memory:
+                    try:
+                        idx = self.full_sequence[self.current_step+1:].index(p)
+                        future_uses.append(idx)
+                    except ValueError:
+                        future_uses.append(float('inf'))
+                page_to_replace = self.memory[future_uses.index(max(future_uses))]
+                self.memory.remove(page_to_replace)
+                self.memory.append(page)
+            self.page_faults += 1
+        self.states.append(list(self.memory))
+        self.current_step += 1
+        return self.page_faults, list(self.memory)
+
+
+class ClockHandler:
+    def __init__(self, frames):
+        self.frames = frames
+        self.memory = [None] * frames
+        self.use_bits = [0] * frames
+        self.pointer = 0
+        self.page_faults = 0
+        self.states = []
+
+    def step(self, page):
+        if page in self.memory:
+            idx = self.memory.index(page)
+            self.use_bits[idx] = 1
+        else:
+            while True:
+                if self.use_bits[self.pointer] == 0:
+                    self.memory[self.pointer] = page
+                    self.use_bits[self.pointer] = 1
+                    self.pointer = (self.pointer + 1) % self.frames
+                    self.page_faults += 1
+                    break
+                else:
+                    self.use_bits[self.pointer] = 0
+                    self.pointer = (self.pointer + 1) % self.frames
+        self.states.append(list(self.memory))
+        return self.page_faults, list(self.memory)
+
+
+class LFUHandler:
+    def __init__(self, frames):
+        self.frames = frames
+        self.memory = []
+        self.usage = Counter()
+        self.page_faults = 0
+        self.states = []
+
+    def step(self, page):
+        self.usage[page] += 1
+        if page not in self.memory:
+            if len(self.memory) < self.frames:
+                self.memory.append(page)
+            else:
+                least_used = min(self.memory, key=lambda x: self.usage[x])
+                self.memory.remove(least_used)
+                self.memory.append(page)
+            self.page_faults += 1
+        self.states.append(list(self.memory))
+        return self.page_faults, list(self.memory)
